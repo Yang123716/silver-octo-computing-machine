@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
     <style>
-        /* 样式与原代码保持一致，此处省略以节省篇幅，实际保留所有样式 */
+        /* ===== 样式保持不变，此处省略，实际沿用之前样式 ===== */
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif; background:#f5f5f5; color:#1e1e1e; line-height:1.7; min-height:100vh; display:flex; flex-direction:column; }
         a { text-decoration:none; color:inherit; }
@@ -158,7 +158,7 @@
         .admin-card .file-input-wrapper .file-btn:hover { background:#e0e0e0; border-color:#b30000; }
         .admin-card .file-input-wrapper input[type="file"] { display:none; }
         .admin-card .file-size-info { font-size:12px; color:#888; }
-        .admin-card .admin-list { max-height:280px; overflow-y:auto; }
+        .admin-card .admin-list { max-height:400px; overflow-y:auto; }
         .admin-card .admin-list .admin-list-item { padding:8px 0; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
         .admin-card .admin-list .admin-list-item:last-child { border-bottom:none; }
         .admin-card .admin-list::-webkit-scrollbar { width:6px; }
@@ -167,10 +167,6 @@
         .admin-card .admin-list::-webkit-scrollbar-thumb:hover { background:#8aa0b8; }
         .admin-card .admin-list-item .item-info { flex:1; font-size:14px; min-width:120px; }
         .admin-card .admin-list-item .item-info strong { color:#990000; }
-        .admin-card .admin-list-item .item-info .status-tag { font-size:11px; padding:0 8px; border-radius:10px; margin-left:6px; }
-        .admin-card .admin-list-item .item-info .status-tag.pending { background:#fff3cd; color:#856404; }
-        .admin-card .admin-list-item .item-info .status-tag.approved { background:#d4edda; color:#155724; }
-        .admin-card .admin-list-item .item-info .status-tag.rejected { background:#f8d7da; color:#721c24; }
         .admin-card .admin-list-item .item-info .role-tag { font-size:12px; padding:2px 12px; border-radius:20px; margin-left:6px; font-weight:700; letter-spacing:0.5px; display:inline-block; }
         .admin-card .admin-list-item .item-info .role-tag.superadmin { background:#ffd700; color:#990000; border:1px solid #b8860b; }
         .admin-card .admin-list-item .item-info .role-tag.admin { background:#17a2b8; color:white; border:1px solid #0f7a94; }
@@ -178,14 +174,18 @@
         .admin-card .admin-list-item .item-info .muted-tag { font-size:11px; padding:0 8px; border-radius:10px; background:#dc3545; color:white; margin-left:4px; }
         .admin-card .admin-list-item .actions { display:flex; gap:4px; flex-shrink:0; flex-wrap:wrap; }
         .admin-card .admin-list-item .actions button { background:none; border:none; cursor:pointer; font-size:13px; padding:2px 6px; border-radius:4px; transition:background 0.2s; }
-        .admin-card .admin-list-item .actions .del-btn { color:#dc3545; }
-        .admin-card .admin-list-item .actions .del-btn:hover { background:#f8d7da; }
         .admin-card .admin-list-item .actions .role-btn { color:#17a2b8; }
         .admin-card .admin-list-item .actions .role-btn:hover { background:#e2f0f5; }
         .admin-card .admin-list-item .actions .mute-btn { color:#fd7e14; }
         .admin-card .admin-list-item .actions .mute-btn:hover { background:#fff3cd; }
         .admin-card .admin-list-item .actions .unmute-btn { color:#28a745; }
         .admin-card .admin-list-item .actions .unmute-btn:hover { background:#d4edda; }
+        .admin-card .admin-list-item .actions .del-btn { color:#dc3545; }
+        .admin-card .admin-list-item .actions .del-btn:hover { background:#f8d7da; }
+        .admin-card .admin-list-item .actions .approve-btn { color:#28a745; }
+        .admin-card .admin-list-item .actions .approve-btn:hover { background:#d4edda; }
+        .admin-card .admin-list-item .actions .reject-btn { color:#dc3545; }
+        .admin-card .admin-list-item .actions .reject-btn:hover { background:#f8d7da; }
         .admin-empty { color:#999; text-align:center; padding:20px 0; }
         .user-manage-msg { padding:10px 16px; border-radius:6px; margin-bottom:12px; display:none; font-weight:600; border-left:4px solid transparent; }
         .user-manage-msg.success { background:#d4edda; color:#155724; border-left-color:#28a745; display:block; }
@@ -263,7 +263,7 @@
         </div>
     </div>
 
-    <!-- 删除申请模态框（保留但后台已移除相关卡片） -->
+    <!-- 删除申请模态框（用户申请删除） -->
     <div class="modal-overlay" id="deleteRequestModal">
         <div class="modal-box">
             <button class="close-modal" onclick="closeDeleteRequestModal()">&times;</button>
@@ -520,6 +520,7 @@
                             <textarea id="policyContent" rows="3" placeholder="政策正文" style="min-height:60px;"></textarea>
                         </div>
                         <button type="submit" class="btn-admin"><i class="fas fa-plus"></i> 发布政策</button>
+                        <div class="error-msg" id="addPolicyError"></div>
                     </form>
                     <div style="border-top:2px solid #f0f0f0; padding-top:12px;">
                         <label style="font-weight:600;font-size:14px;color:#333;">已发布政策</label>
@@ -551,7 +552,7 @@
                     </div>
                 </div>
 
-                <!-- 账号管理（仅超级管理员可见） -->
+                <!-- 账号分发（仅超级管理员） -->
                 <div class="admin-card" id="accountManagementCard" style="display:none;">
                     <h3><i class="fas fa-user-plus"></i> 账号分发</h3>
                     <p style="font-size:14px;color:#666;margin-bottom:12px;">添加新账号，用户将可使用此账号登录（普通用户权限）</p>
@@ -572,6 +573,19 @@
                         <div class="error-msg" id="addAccountError"></div>
                         <div class="success-msg" id="addAccountSuccess"></div>
                     </form>
+                </div>
+
+                <!-- 用户管理（所有管理员可见） -->
+                <div class="admin-card full-width" id="userManagementCard">
+                    <h3><i class="fas fa-users-cog"></i> 用户管理</h3>
+                    <div id="userManageMsg" class="user-manage-msg"></div>
+                    <div class="user-search-bar">
+                        <input type="text" id="userSearchInput" placeholder="搜索用户..." oninput="filterUserList()">
+                        <button onclick="filterUserList()"><i class="fas fa-search"></i> 搜索</button>
+                        <button class="btn-clear" onclick="clearUserSearch()"><i class="fas fa-times"></i> 清除</button>
+                    </div>
+                    <div class="user-search-info">共 <span id="totalUserCount">0</span> 位用户</div>
+                    <div class="admin-list" id="adminUserList"></div>
                 </div>
             </div>
         </div>
@@ -618,7 +632,7 @@
         }
 
         // ================================================================
-        //  通知管理（不变）
+        //  通知管理
         // ================================================================
         var TABLE_CONFIG = 'site_config';
 
@@ -637,6 +651,27 @@
                     await supabaseClient
                         .from(TABLE_CONFIG)
                         .insert([{ key: 'notice', value: '欢迎来到人民共产中央宣传部' }]);
+                }
+                // 初始化 policies 和 leadership
+                var policyResult = await supabaseClient
+                    .from(TABLE_CONFIG)
+                    .select('*')
+                    .eq('key', 'policies')
+                    .maybeSingle();
+                if (!policyResult.data) {
+                    await supabaseClient
+                        .from(TABLE_CONFIG)
+                        .insert([{ key: 'policies', value: '[]' }]);
+                }
+                var leadershipResult = await supabaseClient
+                    .from(TABLE_CONFIG)
+                    .select('*')
+                    .eq('key', 'leadership')
+                    .maybeSingle();
+                if (!leadershipResult.data) {
+                    await supabaseClient
+                        .from(TABLE_CONFIG)
+                        .insert([{ key: 'leadership', value: '[]' }]);
                 }
             } catch (e) { console.error('初始化配置表失败:', e); }
         }
@@ -709,7 +744,7 @@
         }
 
         // ================================================================
-        //  用户管理（只保留必要函数，删除列表等）
+        //  用户管理（独立于人民共产网）
         // ================================================================
         var TABLE_USERS = 'users';
         var currentUser = null;
@@ -742,7 +777,6 @@
             } catch (e) { console.error('初始化用户表失败:', e); }
         }
 
-        // 获取所有用户（仅用于后台账号管理检查，不展示列表）
         async function getUsers() {
             try {
                 var result = await supabaseClient
@@ -861,7 +895,7 @@
         }
 
         // ================================================================
-        //  登录（移除注册）
+        //  登录（仅登录，无注册）
         // ================================================================
         async function loginUser(username, password) {
             try {
@@ -899,12 +933,23 @@
                             showToast('普通用户无法访问管理后台'); } else {
                             renderPolicyAdminList();
                             renderLeadershipAdminList();
-                            // 显示账号管理卡片（仅超级管理员）
+                            renderAdminUserList();
+                            updateUserCount();
+                            // 账号管理卡片仅超级管理员
                             var accountCard = document.getElementById('accountManagementCard');
                             if (await isSuperAdmin()) {
                                 accountCard.style.display = 'block';
                             } else {
                                 accountCard.style.display = 'none';
+                            }
+                            // 禁言审核卡片仅超级管理员
+                            var muteCard = document.getElementById('muteReviewCard');
+                            if (muteCard) muteCard.style.display = await isSuperAdmin() ? 'block' : 'none';
+                            var unmuteCard = document.getElementById('unmuteReviewCard');
+                            if (unmuteCard) unmuteCard.style.display = await isSuperAdmin() ? 'block' : 'none';
+                            if (await isSuperAdmin()) {
+                                renderMuteReviews();
+                                renderUnmuteReviews();
                             }
                         }
                     }
@@ -986,7 +1031,7 @@
         }
 
         // ================================================================
-        //  删除申请（保留但后台不显示卡片）
+        //  删除申请相关（用户申请删除其他用户）
         // ================================================================
         async function getSuperAdmins() {
             var users = await getUsers();
@@ -1069,6 +1114,8 @@
                     'delete_approved');
                 }
                 showToast('✅ 已批准删除用户 ' + targetUsername);
+                renderAdminUserList();
+                updateUserCount();
                 return true;
             } catch (error) { console.error(error);
                 showToast('操作失败'); return false; }
@@ -1094,13 +1141,15 @@
                     await addMessageToUser(requester, '您的删除 ' + targetUsername + ' 的申请已被拒绝。', 'delete_rejected');
                 }
                 showToast('已拒绝该删除申请');
+                renderAdminUserList();
+                updateUserCount();
                 return true;
             } catch (error) { console.error(error);
                 showToast('操作失败'); return false; }
         }
 
         // ================================================================
-        //  禁言功能（保留）
+        //  禁言功能（管理员可禁言普通用户，超级管理员可禁言管理员）
         // ================================================================
         var muteTargetUser = null;
 
@@ -1116,6 +1165,7 @@
                 var isTargetSuper = targetUser.role === 'superadmin';
                 if (isTargetSuper) { showToast('不能禁言超级管理员'); return; }
                 if (isTargetAdmin && !isSuper) {
+                    // 普通管理员禁言管理员需要申请
                     var pending = await getPendingMuteRequests();
                     var existing = null;
                     for (var i = 0; i < pending.length; i++) {
@@ -1199,7 +1249,8 @@
                     reason, 'mute');
                 showToast('✅ 已禁言用户 ' + targetUsername);
                 closeMuteModal();
-                // 不再刷新用户列表，但刷新可能影响其他？无影响
+                renderAdminUserList();
+                updateUserCount();
             } catch (error) { console.error(error);
                 showToast('禁言失败'); } finally {
                 submitBtn.disabled = false;
@@ -1228,11 +1279,13 @@
                 if (!success) { showToast('解除失败'); return; }
                 await addMessageToUser(username, '您已被管理员 ' + currentUser + ' 解除禁言。', 'unmute');
                 showToast('✅ 已解除用户 ' + username + ' 的禁言');
+                renderAdminUserList();
+                updateUserCount();
             });
         }
 
         // ================================================================
-        //  禁言审核（保留）
+        //  禁言审核（超级管理员审核管理员禁言申请）
         // ================================================================
         var currentMuteRequest = null;
 
@@ -1355,7 +1408,9 @@
                 }
                 showToast('✅ 已批准禁言用户 ' + targetUsername);
                 closeMuteReviewModal();
-                await renderMuteReviews();
+                renderMuteReviews();
+                renderAdminUserList();
+                updateUserCount();
             } catch (error) { console.error(error);
                 showToast('操作失败'); }
         }
@@ -1384,13 +1439,15 @@
                 }
                 showToast('已拒绝该禁言申请');
                 closeMuteReviewModal();
-                await renderMuteReviews();
+                renderMuteReviews();
+                renderAdminUserList();
+                updateUserCount();
             } catch (error) { console.error(error);
                 showToast('操作失败'); }
         }
 
         // ================================================================
-        //  解除禁言申请（保留）
+        //  解除禁言申请（用户自己申请解除）
         // ================================================================
         var currentUnmuteRequest = null;
 
@@ -1528,7 +1585,9 @@
                 await addMessageToUser(targetUsername, '您的解除禁言申请已通过，已恢复发言权限。', 'unmute_approved');
                 showToast('✅ 已批准解除用户 ' + targetUsername + ' 的禁言');
                 closeUnmuteReviewModal();
-                await renderUnmuteReviews();
+                renderUnmuteReviews();
+                renderAdminUserList();
+                updateUserCount();
             } catch (error) { console.error(error);
                 showToast('操作失败'); }
         }
@@ -1554,207 +1613,194 @@
                 await addMessageToUser(targetUsername, '您的解除禁言申请已被拒绝。', 'unmute_rejected');
                 showToast('已拒绝该解除禁言申请');
                 closeUnmuteReviewModal();
-                await renderUnmuteReviews();
+                renderUnmuteReviews();
+                renderAdminUserList();
+                updateUserCount();
             } catch (error) { console.error(error);
                 showToast('操作失败'); }
         }
 
         // ================================================================
-        //  Supabase 数据操作（posts表增加category字段）
+        //  政策解读管理（使用 site_config 存储 JSON）
         // ================================================================
-        var TABLE_POSTS = 'posts';
-        var TABLE_COMMENTS = 'comments';
-
-        async function getPosts() {
+        async function getPolicies() {
             try {
                 var result = await supabaseClient
-                    .from(TABLE_POSTS)
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                if (result.error) return [];
-                return result.data || [];
+                    .from(TABLE_CONFIG)
+                    .select('value')
+                    .eq('key', 'policies')
+                    .maybeSingle();
+                if (result.error || !result.data) return [];
+                var data = result.data.value;
+                if (typeof data === 'string') {
+                    try { return JSON.parse(data); } catch (e) { return []; }
+                }
+                return Array.isArray(data) ? data : [];
             } catch (e) { return []; }
         }
 
-        async function getApprovedPosts() {
-            var all = await getPosts();
-            var result = [];
-            for (var i = 0; i < all.length; i++) {
-                if (all[i].status === 'approved') result.push(all[i]);
-            }
-            return result;
-        }
-
-        async function getPostById(id) {
+        async function updatePolicies(policies) {
             try {
                 var result = await supabaseClient
-                    .from(TABLE_POSTS)
+                    .from(TABLE_CONFIG)
                     .select('*')
-                    .eq('id', id)
+                    .eq('key', 'policies')
                     .maybeSingle();
-                if (result.error) return null;
-                return result.data;
-            } catch (e) { return null; }
+                if (result.error) { showToast('❌ 更新政策失败'); return false; }
+                var updateResult;
+                if (result.data) {
+                    updateResult = await supabaseClient
+                        .from(TABLE_CONFIG)
+                        .update({ value: JSON.stringify(policies) })
+                        .eq('key', 'policies');
+                } else {
+                    updateResult = await supabaseClient
+                        .from(TABLE_CONFIG)
+                        .insert([{ key: 'policies', value: JSON.stringify(policies) }]);
+                }
+                if (updateResult.error) { showToast('❌ 更新失败'); return false; }
+                return true;
+            } catch (e) { showToast('❌ 异常'); return false; }
         }
 
-        async function addPost(title, date, content, author, images, video, authorTag, status, rejectReason, category) {
-            images = images || [];
-            video = video || '';
-            authorTag = authorTag || '';
-            status = status || 'pending';
-            rejectReason = rejectReason || '';
-            category = category || '';
-
-            if (await checkUserMuted()) {
-                showToast('❌ 您已被禁言，无法投稿');
-                throw new Error('用户被禁言');
-            }
-
-            var newPost = {
+        async function addPolicy(title, date, content) {
+            var policies = await getPolicies();
+            var newPolicy = {
                 id: Date.now(),
                 title: title,
                 date: date,
                 content: content || '',
-                author: author || '匿名',
-                authorTag: authorTag || '',
-                created_at: Date.now(),
-                status: status,
-                reject_reason: rejectReason,
-                images: images || [],
-                video: video || '',
-                likes: 0,
-                liked_users: [],
-                views: 0,
-                category: category
+                author: currentUser || '管理员',
+                created_at: new Date().toISOString()
             };
-
-            try {
-                var result = await supabaseClient
-                    .from(TABLE_POSTS)
-                    .insert([newPost])
-                    .select();
-                if (result.error) {
-                    showToast('❌ 投稿失败：' + result.error.message);
-                    throw result.error;
-                }
-                return result.data ? result.data[0] : newPost;
-            } catch (e) { throw e; }
+            policies.push(newPolicy);
+            var success = await updatePolicies(policies);
+            return success;
         }
 
-        async function updatePostStatus(postId, status, rejectReason) {
-            rejectReason = rejectReason || '';
-            var updates = { status: status };
-            if (status === 'rejected') {
-                updates.reject_reason = rejectReason;
-                var post = await getPostById(postId);
-                if (post) {
-                    addMessageToUser(post.author, '您的投稿《' + post.title + '》审核未通过，原因：' + rejectReason, 'reject');
-                }
-            } else if (status === 'approved') {
-                updates.reject_reason = '';
-                var post = await getPostById(postId);
-                if (post) {
-                    addMessageToUser(post.author, '您的投稿《' + post.title + '》已通过审核，现已发布。', 'approve');
+        async function deletePolicy(policyId) {
+            var policies = await getPolicies();
+            var newPolicies = policies.filter(function(p) { return p.id !== policyId; });
+            if (newPolicies.length === policies.length) return false;
+            return await updatePolicies(newPolicies);
+        }
+
+        async function editPolicy(policyId, title, date, content) {
+            var policies = await getPolicies();
+            var found = false;
+            for (var i = 0; i < policies.length; i++) {
+                if (policies[i].id === policyId) {
+                    policies[i].title = title;
+                    policies[i].date = date;
+                    policies[i].content = content;
+                    found = true;
+                    break;
                 }
             }
+            if (!found) return false;
+            return await updatePolicies(policies);
+        }
+
+        // ================================================================
+        //  领导班子管理（使用 site_config 存储 JSON）
+        // ================================================================
+        async function getLeadership() {
             try {
                 var result = await supabaseClient
-                    .from(TABLE_POSTS)
-                    .update(updates)
-                    .eq('id', postId);
-                if (result.error) return false;
-                return true;
-            } catch (e) { return false; }
-        }
-
-        async function deletePost(postId) {
-            try {
-                await supabaseClient.from(TABLE_COMMENTS).delete().eq('post_id', postId);
-                var result = await supabaseClient.from(TABLE_POSTS).delete().eq('id', postId);
-                if (result.error) return false;
-                return true;
-            } catch (e) { return false; }
-        }
-
-        // ================================================================
-        //  点赞功能（不变）
-        // ================================================================
-        async function togglePostLike(postId, username) {
-            try {
-                var post = await getPostById(postId);
-                if (!post) return { success: false, message: '文章不存在' };
-                var likedUsers = Array.isArray(post.liked_users) ? post.liked_users : [];
-                var currentLikes = post.likes || 0;
-                var alreadyLiked = false;
-                for (var i = 0; i < likedUsers.length; i++) {
-                    if (likedUsers[i] === username) { alreadyLiked = true; break; }
+                    .from(TABLE_CONFIG)
+                    .select('value')
+                    .eq('key', 'leadership')
+                    .maybeSingle();
+                if (result.error || !result.data) return [];
+                var data = result.data.value;
+                if (typeof data === 'string') {
+                    try { return JSON.parse(data); } catch (e) { return []; }
                 }
-                var newLikedUsers, newLikes;
-                if (alreadyLiked) {
-                    newLikedUsers = [];
-                    for (var i = 0; i < likedUsers.length; i++) {
-                        if (likedUsers[i] !== username) newLikedUsers.push(likedUsers[i]);
-                    }
-                    newLikes = Math.max(0, currentLikes - 1);
+                return Array.isArray(data) ? data : [];
+            } catch (e) { return []; }
+        }
+
+        async function updateLeadership(members) {
+            try {
+                var result = await supabaseClient
+                    .from(TABLE_CONFIG)
+                    .select('*')
+                    .eq('key', 'leadership')
+                    .maybeSingle();
+                if (result.error) { showToast('❌ 更新领导班子失败'); return false; }
+                var updateResult;
+                if (result.data) {
+                    updateResult = await supabaseClient
+                        .from(TABLE_CONFIG)
+                        .update({ value: JSON.stringify(members) })
+                        .eq('key', 'leadership');
                 } else {
-                    newLikedUsers = likedUsers.slice();
-                    newLikedUsers.push(username);
-                    newLikes = currentLikes + 1;
+                    updateResult = await supabaseClient
+                        .from(TABLE_CONFIG)
+                        .insert([{ key: 'leadership', value: JSON.stringify(members) }]);
                 }
-                var result = await supabaseClient
-                    .from(TABLE_POSTS)
-                    .update({ likes: newLikes, liked_users: newLikedUsers })
-                    .eq('id', postId);
-                if (result.error) return { success: false, message: result.error.message };
-                return { success: true, isLiked: !alreadyLiked, likes: newLikes };
-            } catch (error) { return { success: false, message: error.message }; }
+                if (updateResult.error) { showToast('❌ 更新失败'); return false; }
+                return true;
+            } catch (e) { showToast('❌ 异常'); return false; }
         }
 
-        async function toggleLike() {
-            if (!await isLoggedIn()) { showToast('请先登录'); openLoginModal(); return; }
-            var postId = currentPostId;
-            if (!postId) { showToast('请先打开一篇文章'); return; }
-            var likeBtn = document.getElementById('likeBtn');
-            if (!likeBtn || likeBtn.disabled) return;
-            likeBtn.disabled = true;
-            try {
-                var result = await togglePostLike(postId, currentUser);
-                if (!result || !result.success) { showToast(result?.message || '点赞失败'); return; }
-                var likeCountEl = document.getElementById('likeCount');
-                if (likeCountEl) likeCountEl.textContent = result.likes;
-                if (result.isLiked) { likeBtn.classList.add('liked');
-                    showToast('❤️ 点赞成功！'); } else { likeBtn.classList.remove('liked');
-                    showToast('已取消点赞'); }
-            } catch (error) { showToast('操作异常'); } finally { likeBtn.disabled = false; }
-        }
+        // ================================================================
+        //  文章阅读（仅用于政策详情，使用独立存储，不再依赖posts表）
+        // ================================================================
+        var currentPostId = null;
 
-        async function initLikeButtonState(post) {
-            var likeBtn = document.getElementById('likeBtn');
-            var likeCountEl = document.getElementById('likeCount');
-            if (!likeBtn) return;
-            if (likeCountEl) likeCountEl.textContent = post.likes || 0;
-            var likedUsers = Array.isArray(post.liked_users) ? post.liked_users : [];
-            var isLiked = false;
-            if (await isLoggedIn()) {
-                for (var i = 0; i < likedUsers.length; i++) {
-                    if (likedUsers[i] === currentUser) { isLiked = true; break; }
-                }
+        // 获取单条政策（用于详情）
+        async function getPolicyById(id) {
+            var policies = await getPolicies();
+            for (var i = 0; i < policies.length; i++) {
+                if (policies[i].id === id) return policies[i];
             }
-            if (isLiked) likeBtn.classList.add('liked');
-            else likeBtn.classList.remove('liked');
-            likeBtn.disabled = false;
+            return null;
         }
 
-        async function incrementView(postId) {
-            var post = await getPostById(postId);
-            if (!post) return;
-            var newViews = (post.views || 0) + 1;
-            await supabaseClient.from(TABLE_POSTS).update({ views: newViews }).eq('id', postId);
+        async function openDetail(policyId) {
+            var policy = await getPolicyById(policyId);
+            if (!policy) { showToast('文章不存在'); return; }
+            currentPostId = policyId;
+            switchPage('detail', policyId);
+            // 模拟浏览量增加（不持久化）
+            var viewCount = document.getElementById('viewCount');
+            if (viewCount) {
+                var views = parseInt(viewCount.textContent) || 0;
+                viewCount.textContent = views + 1;
+            }
+            // 点赞状态（不持久化）
+            var likeBtn = document.getElementById('likeBtn');
+            if (likeBtn) {
+                likeBtn.classList.remove('liked');
+                document.getElementById('likeCount').textContent = '0';
+                likeBtn.disabled = false;
+            }
+            // 渲染详情
+            await renderDetail(policyId);
         }
 
+        async function renderDetail(policyId) {
+            var policy = await getPolicyById(policyId);
+            if (!policy) { document.getElementById('detailTitle').textContent = '文章不存在'; return; }
+            document.getElementById('detailTitle').textContent = policy.title;
+            document.getElementById('detailMeta').innerHTML = `
+                <i class="far fa-calendar-alt"></i> ${policy.date} &nbsp;|&nbsp; 作者：${escapeHtml(policy.author || '管理员')}
+            `;
+            document.getElementById('detailMedia').innerHTML = '';
+            document.getElementById('detailContent').textContent = policy.content || '（无正文内容）';
+            await renderComments(policyId);
+            updateCommentForm();
+            document.getElementById('commentContent').value = '';
+        }
+
+        function goBackFromDetail() { switchPage('policy'); }
+
         // ================================================================
-        //  评论操作（不变）
+        //  评论功能（独立于文章存储，评论数据仍用 comments 表，关联 post_id）
         // ================================================================
+        var TABLE_COMMENTS = 'comments';
+
         async function getComments(postId) {
             try {
                 var result = await supabaseClient
@@ -1858,75 +1904,30 @@
             } catch (e) { return false; }
         }
 
-        // ================================================================
-        //  文章阅读功能
-        // ================================================================
-        var currentPostId = null;
-
-        async function openDetail(postId) {
-            var post = await getPostById(postId);
-            if (!post) { showToast('信息不存在'); return; }
-            if (post.status !== 'approved') { showToast('该信息尚未通过审核'); return; }
-            currentPostId = postId;
-            switchPage('detail', postId);
-            await incrementView(postId);
-            var p = await getPostById(postId);
-            if (p) {
-                document.getElementById('viewCount').textContent = p.views || 0;
-                await initLikeButtonState(p);
-            }
-        }
-
-        async function renderDetail(postId) {
-            var post = await getPostById(postId);
-            if (!post) { document.getElementById('detailTitle').textContent = '信息不存在'; return; }
-            document.getElementById('detailTitle').textContent = post.title;
-            var authorTagHtml = post.authorTag ? '<span class="author-tag">' + escapeHtml(post.authorTag) + '</span>' : '';
-            document.getElementById('detailMeta').innerHTML = `
-                <i class="far fa-calendar-alt"></i> ${post.date} &nbsp;|&nbsp; 作者：${escapeHtml(post.author)}${authorTagHtml}
-                ${post.images && post.images.length > 0 ? ' &nbsp;|&nbsp; <i class="fas fa-image"></i> ' + post.images.length + '张图片' : ''}
-                ${post.video ? ' &nbsp;|&nbsp; <i class="fas fa-video"></i> 视频' : ''}
-            `;
-            var mediaContainer = document.getElementById('detailMedia');
-            var mediaHtml = '';
-            if (post.images && post.images.length > 0) {
-                for (var i = 0; i < post.images.length; i++) {
-                    mediaHtml += '<div class="media-item"><img src="' + post.images[i] + '" alt="图片"></div>';
-                }
-            }
-            if (post.video) {
-                mediaHtml += '<div class="media-item"><video controls src="' + post.video + '"></video></div>';
-            }
-            mediaContainer.innerHTML = mediaHtml;
-            document.getElementById('detailContent').textContent = post.content || '（无正文内容）';
-            await renderComments(postId);
-            updateCommentForm();
-            document.getElementById('commentContent').value = '';
-        }
-
-        function goBackFromDetail() { switchPage('home'); }
+        // 点赞（文章点赞功能移除，仅保留评论点赞）
 
         // ================================================================
-        //  政策解读列表
+        //  政策解读列表渲染
         // ================================================================
         async function renderPolicyList() {
             var container = document.getElementById('policyPostList');
             if (!container) return;
-            var posts = await getApprovedPosts();
-            var policyPosts = posts.filter(function(p) { return p.category === 'policy'; });
-            if (policyPosts.length === 0) {
+            var policies = await getPolicies();
+            if (policies.length === 0) {
                 container.innerHTML = '<div style="color:#999;padding:20px;">暂无政策解读内容，敬请期待。</div>';
                 return;
             }
+            // 按日期降序
+            policies.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
             var html = '';
-            for (var i = 0; i < policyPosts.length; i++) {
-                var p = policyPosts[i];
+            for (var i = 0; i < policies.length; i++) {
+                var p = policies[i];
                 var summary = p.content ? escapeHtml(p.content.substring(0, 80)) : '';
                 if (p.content && p.content.length > 80) summary += '...';
                 html += `
                     <div class="post-item" data-post-id="${p.id}">
                         <h3>${escapeHtml(p.title)}</h3>
-                        <div class="meta"><i class="far fa-calendar-alt"></i> ${p.date} &nbsp;|&nbsp; 作者：${escapeHtml(p.author)}</div>
+                        <div class="meta"><i class="far fa-calendar-alt"></i> ${p.date} &nbsp;|&nbsp; 作者：${escapeHtml(p.author || '管理员')}</div>
                         <div class="summary">${summary}</div>
                         <span class="read-more">阅读全文 <i class="fas fa-arrow-right"></i></span>
                     </div>
@@ -1942,56 +1943,16 @@
                     el = el.parentNode;
                 }
                 if (postItem) {
-                    var postId = postItem.getAttribute('data-post-id');
+                    var postId = parseInt(postItem.getAttribute('data-post-id'));
                     if (postId) { e.preventDefault();
-                        window.openDetail(parseInt(postId)); }
+                        window.openDetail(postId); }
                 }
             };
         }
 
         // ================================================================
-        //  领导班子（从site_config读取）
+        //  领导班子渲染
         // ================================================================
-        async function getLeadership() {
-            try {
-                var result = await supabaseClient
-                    .from(TABLE_CONFIG)
-                    .select('value')
-                    .eq('key', 'leadership')
-                    .maybeSingle();
-                if (result.error || !result.data) return [];
-                var data = result.data.value;
-                if (typeof data === 'string') {
-                    try { return JSON.parse(data); } catch (e) { return []; }
-                }
-                return Array.isArray(data) ? data : [];
-            } catch (e) { return []; }
-        }
-
-        async function updateLeadership(members) {
-            try {
-                var result = await supabaseClient
-                    .from(TABLE_CONFIG)
-                    .select('*')
-                    .eq('key', 'leadership')
-                    .maybeSingle();
-                if (result.error) { showToast('❌ 更新领导班子失败'); return false; }
-                var updateResult;
-                if (result.data) {
-                    updateResult = await supabaseClient
-                        .from(TABLE_CONFIG)
-                        .update({ value: JSON.stringify(members) })
-                        .eq('key', 'leadership');
-                } else {
-                    updateResult = await supabaseClient
-                        .from(TABLE_CONFIG)
-                        .insert([{ key: 'leadership', value: JSON.stringify(members) }]);
-                }
-                if (updateResult.error) { showToast('❌ 更新失败'); return false; }
-                return true;
-            } catch (e) { showToast('❌ 异常'); return false; }
-        }
-
         async function renderLeadership() {
             var container = document.getElementById('leadershipList');
             if (!container) return;
@@ -2041,7 +2002,7 @@
                         }
                     });
                     window.isSuperAdmin().then(function(isSuper) {
-                        // 禁言审核卡片仅超级管理员可见
+                        // 禁言审核卡片
                         var muteCard = document.getElementById('muteReviewCard');
                         if (muteCard) muteCard.style.display = isSuper ? 'block' : 'none';
                         var unmuteCard = document.getElementById('unmuteReviewCard');
@@ -2050,7 +2011,7 @@
                             renderMuteReviews();
                             renderUnmuteReviews();
                         }
-                        // 账号管理卡片仅超级管理员可见
+                        // 账号管理卡片
                         var accountCard = document.getElementById('accountManagementCard');
                         if (accountCard) accountCard.style.display = isSuper ? 'block' : 'none';
                     });
@@ -2079,6 +2040,8 @@
                         'active')) {
                     renderPolicyAdminList();
                     renderLeadershipAdminList();
+                    renderAdminUserList();
+                    updateUserCount();
                     renderMuteReviews();
                     renderUnmuteReviews();
                 }
@@ -2112,7 +2075,7 @@
         }
 
         // ================================================================
-        //  登录/注册模态框（已移除注册，只保留登录）
+        //  登录模态框（关闭）
         // ================================================================
         var loginModal = document.getElementById('loginModal');
         var loginError = document.getElementById('loginError');
@@ -2135,7 +2098,7 @@
         loginModal.addEventListener('click', function(e) { if (e.target === this) closeLoginModal(); });
 
         // ================================================================
-        //  消息中心（不变）
+        //  消息中心
         // ================================================================
         function openMsgModal() {
             document.getElementById('msgModal').classList.add('show');
@@ -2239,12 +2202,14 @@
             if (pageId === 'admin') {
                 renderPolicyAdminList();
                 renderLeadershipAdminList();
+                renderAdminUserList();
+                updateUserCount();
                 renderMuteReviews();
                 renderUnmuteReviews();
                 loadNotice().then(function(notice) {
                     document.getElementById('noticeInput').value = notice || '';
                 });
-                // 显示账号管理卡片（仅超级管理员）
+                // 账号管理卡片
                 isSuperAdmin().then(function(isSuper) {
                     var card = document.getElementById('accountManagementCard');
                     if (card) card.style.display = isSuper ? 'block' : 'none';
@@ -2285,7 +2250,7 @@
         });
 
         // ================================================================
-        //  个人中心（不变）
+        //  个人中心
         // ================================================================
         async function renderProfile() {
             var container = document.getElementById('profileContent');
@@ -2450,31 +2415,44 @@
             var title = document.getElementById('policyTitle').value.trim();
             var date = document.getElementById('policyDate').value;
             var content = document.getElementById('policyContent').value.trim();
-            if (!title || !date) { showToast('请填写标题和日期'); return; }
+            if (!title || !date) {
+                document.getElementById('addPolicyError').textContent = '请填写标题和日期';
+                document.getElementById('addPolicyError').style.display = 'block';
+                return;
+            }
             try {
-                await addPost(title, date, content, currentUser, [], '', '', 'approved', '', 'policy');
-                showToast('✅ 政策发布成功');
-                document.getElementById('policyTitle').value = '';
-                document.getElementById('policyDate').value = '';
-                document.getElementById('policyContent').value = '';
-                renderPolicyAdminList();
-                renderPolicyList();
-            } catch (err) { showToast('发布失败'); }
+                var success = await addPolicy(title, date, content);
+                if (success) {
+                    showToast('✅ 政策发布成功');
+                    document.getElementById('policyTitle').value = '';
+                    document.getElementById('policyDate').value = '';
+                    document.getElementById('policyContent').value = '';
+                    document.getElementById('addPolicyError').style.display = 'none';
+                    renderPolicyAdminList();
+                    renderPolicyList();
+                } else {
+                    document.getElementById('addPolicyError').textContent = '发布失败，请重试';
+                    document.getElementById('addPolicyError').style.display = 'block';
+                }
+            } catch (err) {
+                document.getElementById('addPolicyError').textContent = '发布失败：' + err.message;
+                document.getElementById('addPolicyError').style.display = 'block';
+            }
         });
 
         async function renderPolicyAdminList() {
             var container = document.getElementById('policyAdminList');
             if (!container) return;
             if (!await window.isAdmin()) { container.innerHTML = '<div class="admin-empty">权限不足</div>'; return; }
-            var posts = await getPosts();
-            var policyPosts = posts.filter(function(p) { return p.category === 'policy'; });
-            if (policyPosts.length === 0) {
+            var policies = await getPolicies();
+            if (policies.length === 0) {
                 container.innerHTML = '<div class="admin-empty">暂无政策文章</div>';
                 return;
             }
+            policies.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
             var html = '';
-            for (var i = 0; i < policyPosts.length; i++) {
-                var p = policyPosts[i];
+            for (var i = 0; i < policies.length; i++) {
+                var p = policies[i];
                 html += `
                     <div class="admin-list-item">
                         <span class="item-info">
@@ -2482,8 +2460,8 @@
                             <span style="color:#888;font-size:13px;">${p.date}</span>
                         </span>
                         <div class="actions">
-                            <button class="role-btn" onclick="editPolicy('${p.id}')" title="编辑"><i class="fas fa-edit"></i></button>
-                            <button class="del-btn" onclick="deletePolicy('${p.id}')" title="删除"><i class="fas fa-trash-alt"></i></button>
+                            <button class="role-btn" onclick="editPolicyModal(${p.id})" title="编辑"><i class="fas fa-edit"></i></button>
+                            <button class="del-btn" onclick="deletePolicyAction(${p.id})" title="删除"><i class="fas fa-trash-alt"></i></button>
                         </div>
                     </div>
                 `;
@@ -2491,16 +2469,16 @@
             container.innerHTML = html;
         }
 
-        async function editPolicy(postId) {
-            if (!await window.isAdmin()) { showToast('权限不足'); return; }
-            var post = await getPostById(postId);
-            if (!post) { showToast('文章不存在'); return; }
-            document.getElementById('editPolicyId').value = postId;
-            document.getElementById('editPolicyTitleInput').value = post.title;
-            document.getElementById('editPolicyDate').value = post.date;
-            document.getElementById('editPolicyContent').value = post.content || '';
-            document.getElementById('editPolicyError').style.display = 'none';
-            document.getElementById('editPolicyModal').classList.add('show');
+        function editPolicyModal(policyId) {
+            getPolicyById(policyId).then(function(policy) {
+                if (!policy) { showToast('文章不存在'); return; }
+                document.getElementById('editPolicyId').value = policy.id;
+                document.getElementById('editPolicyTitleInput').value = policy.title;
+                document.getElementById('editPolicyDate').value = policy.date;
+                document.getElementById('editPolicyContent').value = policy.content || '';
+                document.getElementById('editPolicyError').style.display = 'none';
+                document.getElementById('editPolicyModal').classList.add('show');
+            });
         }
 
         function closeEditPolicyModal() {
@@ -2509,29 +2487,26 @@
 
         document.getElementById('editPolicyForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            var postId = parseInt(document.getElementById('editPolicyId').value);
+            var id = parseInt(document.getElementById('editPolicyId').value);
             var title = document.getElementById('editPolicyTitleInput').value.trim();
             var date = document.getElementById('editPolicyDate').value;
             var content = document.getElementById('editPolicyContent').value.trim();
             if (!title || !date) { showToast('请填写完整'); return; }
-            try {
-                var updates = { title: title, date: date, content: content };
-                var result = await supabaseClient
-                    .from(TABLE_POSTS)
-                    .update(updates)
-                    .eq('id', postId);
-                if (result.error) { showToast('更新失败'); return; }
+            var success = await editPolicy(id, title, date, content);
+            if (success) {
                 showToast('✅ 更新成功');
                 closeEditPolicyModal();
                 renderPolicyAdminList();
                 renderPolicyList();
-            } catch (err) { showToast('更新失败'); }
+            } else {
+                showToast('更新失败');
+            }
         });
 
-        async function deletePolicy(postId) {
+        async function deletePolicyAction(policyId) {
             if (!await window.isAdmin()) { showToast('权限不足'); return; }
             if (!confirm('确定删除该政策文章吗？')) return;
-            var success = await deletePost(postId);
+            var success = await deletePolicy(policyId);
             if (success) {
                 showToast('已删除');
                 renderPolicyAdminList();
@@ -2580,8 +2555,8 @@
                             <strong>${escapeHtml(m.name)}</strong> - ${escapeHtml(m.title)}
                         </span>
                         <div class="actions">
-                            <button class="role-btn" onclick="editLeadership(${i})" title="编辑"><i class="fas fa-edit"></i></button>
-                            <button class="del-btn" onclick="deleteLeadership(${i})" title="删除"><i class="fas fa-trash-alt"></i></button>
+                            <button class="role-btn" onclick="editLeadershipModal(${i})" title="编辑"><i class="fas fa-edit"></i></button>
+                            <button class="del-btn" onclick="deleteLeadershipAction(${i})" title="删除"><i class="fas fa-trash-alt"></i></button>
                         </div>
                     </div>
                 `;
@@ -2589,17 +2564,17 @@
             container.innerHTML = html;
         }
 
-        async function editLeadership(index) {
-            if (!await window.isAdmin()) { showToast('权限不足'); return; }
-            var members = await getLeadership();
-            if (index < 0 || index >= members.length) { showToast('成员不存在'); return; }
-            var m = members[index];
-            document.getElementById('editLeadershipIndex').value = index;
-            document.getElementById('editLeadershipName').value = m.name;
-            document.getElementById('editLeadershipTitleInput').value = m.title;
-            document.getElementById('editLeadershipDesc').value = m.description || '';
-            document.getElementById('editLeadershipError').style.display = 'none';
-            document.getElementById('editLeadershipModal').classList.add('show');
+        function editLeadershipModal(index) {
+            getLeadership().then(function(members) {
+                if (index < 0 || index >= members.length) { showToast('成员不存在'); return; }
+                var m = members[index];
+                document.getElementById('editLeadershipIndex').value = index;
+                document.getElementById('editLeadershipName').value = m.name;
+                document.getElementById('editLeadershipTitleInput').value = m.title;
+                document.getElementById('editLeadershipDesc').value = m.description || '';
+                document.getElementById('editLeadershipError').style.display = 'none';
+                document.getElementById('editLeadershipModal').classList.add('show');
+            });
         }
 
         function closeEditLeadershipModal() {
@@ -2625,7 +2600,7 @@
             } else { showToast('更新失败'); }
         });
 
-        async function deleteLeadership(index) {
+        async function deleteLeadershipAction(index) {
             if (!await window.isAdmin()) { showToast('权限不足'); return; }
             if (!confirm('确定删除该成员吗？')) return;
             var members = await getLeadership();
@@ -2640,7 +2615,7 @@
         }
 
         // ================================================================
-        //  账号管理（仅超级管理员）
+        //  账号分发（仅超级管理员）
         // ================================================================
         document.getElementById('addAccountForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -2696,6 +2671,8 @@
                 document.getElementById('newPassword').value = '';
                 document.getElementById('newPasswordConfirm').value = '';
                 showToast('账号已添加');
+                renderAdminUserList();
+                updateUserCount();
             } else {
                 errorEl.textContent = '创建失败，请重试';
                 errorEl.style.display = 'block';
@@ -2703,7 +2680,280 @@
         });
 
         // ================================================================
-        //  评论相关（不变）
+        //  用户管理（列表、搜索、提升/降级管理员、禁言、删除）
+        // ================================================================
+        var userSearchKeyword = '';
+
+        function filterUserList() {
+            var input = document.getElementById('userSearchInput');
+            userSearchKeyword = input.value.trim().toLowerCase();
+            renderAdminUserList();
+            updateUserCount();
+        }
+
+        function clearUserSearch() {
+            document.getElementById('userSearchInput').value = '';
+            userSearchKeyword = '';
+            renderAdminUserList();
+            updateUserCount();
+        }
+
+        async function updateUserCount() {
+            var users = await getUsers();
+            var filtered = users;
+            if (userSearchKeyword) {
+                filtered = [];
+                for (var i = 0; i < users.length; i++) {
+                    if (users[i].username.toLowerCase().includes(userSearchKeyword)) filtered.push(users[i]);
+                }
+            }
+            document.getElementById('totalUserCount').textContent = filtered.length;
+        }
+
+        function showUserManageMsg(msg, type) {
+            type = type || 'info';
+            var el = document.getElementById('userManageMsg');
+            if (!el) return;
+            el.textContent = msg;
+            el.className = 'user-manage-msg ' + type;
+            clearTimeout(el._timer);
+            el._timer = setTimeout(function() { el.className = 'user-manage-msg';
+                el.textContent = ''; }, 5000);
+        }
+
+        async function renderAdminUserList() {
+            var container = document.getElementById('adminUserList');
+            if (!container) return;
+            if (!await window.isAdmin()) { container.innerHTML = '<div class="admin-empty">权限不足</div>'; return; }
+
+            var allUsers = await getUsers();
+            var searchInput = document.getElementById('userSearchInput');
+            var keyword = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            var users = allUsers;
+            if (keyword) {
+                users = users.filter(function(u) { return u.username.toLowerCase().includes(keyword); });
+            }
+
+            if (users.length === 0) {
+                container.innerHTML = '<div class="admin-empty">没有找到匹配的用户</div>';
+                return;
+            }
+
+            var currentUsername = getCurrentUser();
+            var isSuper = await window.isSuperAdmin();
+            var isAdminUser = await window.isAdmin();
+
+            var html = '';
+            for (var i = 0; i < users.length; i++) {
+                var u = users[i];
+                var role = u.role || 'user';
+                var isSelf = u.username === currentUsername;
+                var isSuperAdmin = role === 'superadmin';
+                var isTargetAdmin = role === 'admin';
+                var muted = isUserMuted(u);
+                var muteDays = getMuteRemainingDays(u);
+
+                var roleLabel = '用户',
+                    roleClass = 'user';
+                if (isSuperAdmin) { roleLabel = '超级管理员';
+                    roleClass = 'superadmin'; } else if (isTargetAdmin) { roleLabel = '管理员';
+                    roleClass = 'admin'; }
+
+                var muteLabel = '';
+                if (muted) {
+                    muteLabel = muteDays === -1 ? '🔇 永久禁言' : '🔇 禁言(' + muteDays + '天)';
+                }
+
+                var actionsHtml = '';
+
+                // 提升/降级（仅超级管理员可操作，不能操作自己，不能操作超级管理员）
+                if (isSuper && !isSelf && !isSuperAdmin) {
+                    var targetRole = isTargetAdmin ? 'user' : 'admin';
+                    var label = isTargetAdmin ? '降级为普通用户' : '提升为管理员';
+                    var icon = isTargetAdmin ? 'fa-user-minus' : 'fa-user-plus';
+                    actionsHtml += `
+                        <button class="role-btn" onclick="changeUserRole('${u.username}', '${targetRole}')" title="${label}">
+                            <i class="fas ${icon}"></i>
+                        </button>
+                    `;
+                }
+
+                // 禁言/解除禁言（管理员可操作，不能操作自己，不能操作超级管理员，不能操作比自己权限高的）
+                if (isAdminUser && !isSelf && !isSuperAdmin) {
+                    // 普通管理员不能操作管理员，除非有超级管理员权限（但超级管理员已包含）
+                    if (!(isTargetAdmin && !isSuper)) {
+                        if (muted) {
+                            actionsHtml += `
+                                <button class="unmute-btn" onclick="unmuteUser('${u.username}')" title="解除禁言">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
+                            `;
+                        } else {
+                            actionsHtml += `
+                                <button class="mute-btn" onclick="openMuteModal('${u.username}')" title="禁言">
+                                    <i class="fas fa-microphone-slash"></i>
+                                </button>
+                            `;
+                        }
+                    }
+                }
+
+                // 删除账号
+                if (isSuper && !isSelf && !isSuperAdmin) {
+                    actionsHtml += `
+                        <button class="del-btn" onclick="deleteUserDirectly('${u.username}')" title="删除用户">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    `;
+                } else if (isAdminUser && !isSelf && !isSuperAdmin && !isTargetAdmin) {
+                    // 普通管理员可申请删除其他普通用户
+                    actionsHtml += `
+                        <button class="del-btn" onclick="openDeleteRequestModal('${u.username}')" title="申请删除" style="color:#b8860b;">
+                            <i class="fas fa-clock"></i>
+                        </button>
+                    `;
+                }
+
+                html += `
+                    <div class="admin-list-item">
+                        <span class="item-info">
+                            <strong>${escapeHtml(u.username)}</strong>
+                            <span class="role-tag ${roleClass}">${roleLabel}</span>
+                            ${isSelf ? ' <span style="color:#888;font-size:12px;">(当前)</span>' : ''}
+                            ${muteLabel ? '<span class="muted-tag">' + muteLabel + '</span>' : ''}
+                        </span>
+                        <div class="actions">
+                            ${actionsHtml}
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // 修改用户角色（仅超级管理员）
+        async function changeUserRole(username, newRole) {
+            if (!await window.isSuperAdmin()) { showToast('只有超级管理员可以修改角色'); return; }
+            try {
+                var user = await findUser(username);
+                if (!user) { showToast('用户不存在'); return; }
+                if (user.role === 'superadmin') { showToast('不能修改超级管理员'); return; }
+                user.role = newRole;
+                var success = await saveUser(user);
+                if (!success) { showToast('更新失败'); return; }
+                renderAdminUserList();
+                updateUserCount();
+                var roleLabel = newRole === 'admin' ? '管理员' : '普通用户';
+                showToast('✅ 用户 ' + username + ' 已' + (newRole === 'admin' ? '提升为' : '降级为') + roleLabel);
+                await addMessageToUser(username, '您的角色已变更为 ' + roleLabel + '。', 'role_change');
+                if (username === getCurrentUser()) updateUIForUser();
+            } catch (error) { console.error(error);
+                showToast('操作失败'); }
+        }
+
+        // 超级管理员直接删除用户
+        async function deleteUserDirectly(username) {
+            if (!await window.isSuperAdmin()) { showToast('只有超级管理员可以执行此操作'); return; }
+            if (username === getCurrentUser()) { showToast('不能删除自己'); return; }
+            try {
+                var user = await findUser(username);
+                if (!user) { showToast('用户不存在'); return; }
+                if (user.role === 'superadmin') { showToast('不能删除超级管理员'); return; }
+                if (!confirm('确定要永久删除用户 "' + username + '" 吗？此操作不可恢复！')) return;
+                var success = await deleteUser(username);
+                if (!success) { showToast('删除失败'); return; }
+                renderAdminUserList();
+                updateUserCount();
+                showToast('用户 ' + username + ' 已删除');
+                updateUIForUser();
+            } catch (error) { console.error(error);
+                showToast('删除失败'); }
+        }
+
+        // ================================================================
+        //  删除申请模态框（用户申请删除）
+        // ================================================================
+        var deleteRequestTarget = null;
+
+        function openDeleteRequestModal(username) {
+            if (!currentUser) { showToast('请先登录'); return; }
+            window.isAdmin().then(function(admin) {
+                if (!admin) { showToast('只有管理员可以申请删除'); return; }
+                window.isSuperAdmin().then(function(superAdmin) {
+                    if (superAdmin) { showToast('超级管理员请直接使用删除按钮'); return; }
+                    findUser(username).then(function(u) {
+                        if (u && (u.role === 'admin' || u.role === 'superadmin')) {
+                            showToast('不能申请删除管理员或超级管理员');
+                            return;
+                        }
+                        deleteRequestTarget = username;
+                        document.getElementById('deleteTargetUser').textContent = username;
+                        document.getElementById('deleteReason').value = '';
+                        document.getElementById('deleteRequestError').style.display = 'none';
+                        document.getElementById('deleteRequestModal').classList.add('show');
+                    });
+                });
+            });
+        }
+
+        function closeDeleteRequestModal() {
+            document.getElementById('deleteRequestModal').classList.remove('show');
+            deleteRequestTarget = null;
+        }
+
+        document.getElementById('deleteRequestForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            var reason = document.getElementById('deleteReason').value.trim();
+            if (!reason) {
+                document.getElementById('deleteRequestError').textContent = '请填写删除理由';
+                document.getElementById('deleteRequestError').style.display = 'block';
+                return;
+            }
+            if (!deleteRequestTarget) { showToast('目标用户不存在'); return; }
+            var success = await requestDeleteUser(deleteRequestTarget, reason);
+            if (success) {
+                closeDeleteRequestModal();
+                renderAdminUserList();
+                updateUserCount();
+            } else {
+                document.getElementById('deleteRequestError').textContent = '申请提交失败';
+                document.getElementById('deleteRequestError').style.display = 'block';
+            }
+        });
+
+        document.querySelectorAll('#deleteRequestModal .close-modal').forEach(function(el) {
+            el.addEventListener('click', closeDeleteRequestModal);
+        });
+        document.getElementById('deleteRequestModal').addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteRequestModal();
+        });
+
+        // 禁言模态框关闭
+        document.querySelectorAll('#muteModal .close-modal').forEach(function(el) {
+            el.addEventListener('click', closeMuteModal);
+        });
+        document.getElementById('muteModal').addEventListener('click', function(e) {
+            if (e.target === this) closeMuteModal();
+        });
+
+        // 禁言审核模态框关闭
+        document.querySelectorAll('#muteReviewModal .close-modal').forEach(function(el) {
+            el.addEventListener('click', closeMuteReviewModal);
+        });
+        document.getElementById('muteReviewModal').addEventListener('click', function(e) {
+            if (e.target === this) closeMuteReviewModal();
+        });
+
+        // 解除禁言审核模态框关闭
+        document.querySelectorAll('#unmuteReviewModal .close-modal').forEach(function(el) {
+            el.addEventListener('click', closeUnmuteReviewModal);
+        });
+        document.getElementById('unmuteReviewModal').addEventListener('click', function(e) {
+            if (e.target === this) closeUnmuteReviewModal();
+        });
+
+        // ================================================================
+        //  评论相关（保持不变）
         // ================================================================
         async function renderComments(postId) {
             var container = document.getElementById('commentList');
@@ -2796,6 +3046,8 @@
             }
         }
 
+        // 文章点赞功能移除（已无文章点赞需求）
+
         // ================================================================
         //  通知表单
         // ================================================================
@@ -2813,10 +3065,10 @@
             function handleHash() {
                 var hash = window.location.hash;
                 if (hash && hash.startsWith('#detail-')) {
-                    var postId = parseInt(hash.replace('#detail-', ''));
-                    if (postId) {
+                    var id = parseInt(hash.replace('#detail-', ''));
+                    if (id) {
                         setTimeout(function() {
-                            if (typeof window.openDetail === 'function') window.openDetail(postId);
+                            if (typeof window.openDetail === 'function') window.openDetail(id);
                         }, 500);
                     }
                 }
@@ -2862,7 +3114,6 @@
         window.deleteMessage = deleteMessage;
         window.renderProfile = renderProfile;
         window.deleteAccount = deleteAccount;
-        window.toggleLike = toggleLike;
         window.toggleCommentLikeAction = toggleCommentLikeAction;
         window.closeLoginModal = closeLoginModal;
         window.requestDeleteUser = requestDeleteUser;
@@ -2893,12 +3144,12 @@
         window.renderLeadership = renderLeadership;
         window.renderPolicyAdminList = renderPolicyAdminList;
         window.renderLeadershipAdminList = renderLeadershipAdminList;
-        window.editPolicy = editPolicy;
+        window.editPolicyModal = editPolicyModal;
         window.closeEditPolicyModal = closeEditPolicyModal;
-        window.deletePolicy = deletePolicy;
-        window.editLeadership = editLeadership;
+        window.deletePolicyAction = deletePolicyAction;
+        window.editLeadershipModal = editLeadershipModal;
         window.closeEditLeadershipModal = closeEditLeadershipModal;
-        window.deleteLeadership = deleteLeadership;
+        window.deleteLeadershipAction = deleteLeadershipAction;
         window.checkUserMuted = checkUserMuted;
         window.isSuperAdmin = isSuperAdmin;
         window.isAdmin = isAdmin;
@@ -2912,6 +3163,13 @@
         window.loginUser = loginUser;
         window.escapeHtml = escapeHtml;
         window.handleLogin = window.handleLogin;
+        window.filterUserList = filterUserList;
+        window.clearUserSearch = clearUserSearch;
+        window.updateUserCount = updateUserCount;
+        window.renderAdminUserList = renderAdminUserList;
+        window.showUserManageMsg = showUserManageMsg;
+        window.changeUserRole = changeUserRole;
+        window.deleteUserDirectly = deleteUserDirectly;
     </script>
 </body>
 </html>
