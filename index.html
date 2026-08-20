@@ -11,7 +11,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
     <style>
         /* 样式与原代码保持一致，此处省略以节省篇幅，实际保留所有样式 */
-        /* 原样式未作改动，在此不再重复，直接沿用 */
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif; background:#f5f5f5; color:#1e1e1e; line-height:1.7; min-height:100vh; display:flex; flex-direction:column; }
         a { text-decoration:none; color:inherit; }
@@ -207,7 +206,6 @@
         .msg-modal .msg-box .close-msg:hover { color:#333; }
         .msg-modal .msg-box h3 { color:#990000; font-size:22px; margin-bottom:16px; border-bottom:2px solid #f0f0f0; padding-bottom:10px; }
         .msg-modal .msg-item { padding:12px 0; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
-        .msg-modal .msg-item:last-child { border-bottom:none; }
         .msg-modal .msg-item .msg-left { flex:1; }
         .msg-modal .msg-item .msg-time { font-size:12px; color:#999; margin-right:10px; }
         .msg-modal .msg-item .msg-content { font-size:15px; color:#333; }
@@ -248,38 +246,20 @@
         </div>
     </div>
 
-    <!-- 登录模态框 -->
+    <!-- 登录模态框（仅登录） -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal-box">
             <button class="close-modal" id="closeLoginModal">&times;</button>
-            <h2 id="modalTitle">登录</h2>
-            <div class="sub" id="modalSub">登录您的账号以发表评论</div>
-            <div class="tabs">
-                <button class="active-tab" id="tabLogin" onclick="switchAuthTab('login')">登录</button>
-                <button id="tabRegister" onclick="switchAuthTab('register')">注册</button>
-            </div>
-            <div id="loginFormContainer" class="form-container">
-                <form id="loginForm" onsubmit="return handleLogin(event)">
-                    <label for="loginUser">用户名</label>
-                    <input type="text" id="loginUser" placeholder="请输入用户名" required>
-                    <label for="loginPass">密码</label>
-                    <input type="password" id="loginPass" placeholder="请输入密码" required>
-                    <button type="submit" class="submit-btn">登 录</button>
-                    <div class="error-msg" id="loginError">用户名或密码错误！</div>
-                </form>
-            </div>
-            <div id="registerFormContainer" class="form-container hidden">
-                <form id="registerForm" onsubmit="return handleRegister(event)">
-                    <label for="regUser">用户名</label>
-                    <input type="text" id="regUser" placeholder="请设置用户名" required>
-                    <label for="regPass">密码</label>
-                    <input type="password" id="regPass" placeholder="请设置密码（至少6位）" required minlength="6">
-                    <label for="regPassConfirm">确认密码</label>
-                    <input type="password" id="regPassConfirm" placeholder="再次输入密码" required>
-                    <button type="submit" class="submit-btn">注 册</button>
-                    <div class="error-msg" id="registerError">注册失败，请检查信息</div>
-                </form>
-            </div>
+            <h2>登录</h2>
+            <div class="sub">登录您的账号以发表评论或管理后台</div>
+            <form id="loginForm" onsubmit="return handleLogin(event)">
+                <label for="loginUser">用户名</label>
+                <input type="text" id="loginUser" placeholder="请输入用户名" required>
+                <label for="loginPass">密码</label>
+                <input type="password" id="loginPass" placeholder="请输入密码" required>
+                <button type="submit" class="submit-btn">登 录</button>
+                <div class="error-msg" id="loginError">用户名或密码错误！</div>
+            </form>
         </div>
     </div>
 
@@ -424,7 +404,7 @@
     <!-- 主容器 -->
     <div class="main-wrapper">
 
-        <!-- 首页（内容已清空） -->
+        <!-- 首页 -->
         <div id="page-home" class="page active">
             <div class="card" style="text-align:center;padding:60px 20px;">
                 <i class="fas fa-info-circle" style="font-size:48px;color:#dce3ed;display:block;margin-bottom:16px;"></i>
@@ -433,7 +413,7 @@
             </div>
         </div>
 
-        <!-- 信息公开（内容已清空） -->
+        <!-- 信息公开 -->
         <div id="page-info" class="page">
             <div class="card" style="text-align:center;padding:60px 20px;">
                 <i class="fas fa-file-alt" style="font-size:48px;color:#dce3ed;display:block;margin-bottom:16px;"></i>
@@ -571,17 +551,27 @@
                     </div>
                 </div>
 
-                <!-- 用户管理 -->
-                <div class="admin-card full-width" id="userManagementCard">
-                    <h3><i class="fas fa-users-cog"></i> 用户管理</h3>
-                    <div id="userManageMsg" class="user-manage-msg"></div>
-                    <div class="user-search-bar">
-                        <input type="text" id="userSearchInput" placeholder="搜索用户..." oninput="filterUserList()">
-                        <button onclick="filterUserList()"><i class="fas fa-search"></i> 搜索</button>
-                        <button class="btn-clear" onclick="clearUserSearch()"><i class="fas fa-times"></i> 清除</button>
-                    </div>
-                    <div class="user-search-info">共 <span id="totalUserCount">0</span> 位用户</div>
-                    <div class="admin-list" id="adminUserList"></div>
+                <!-- 账号管理（仅超级管理员可见） -->
+                <div class="admin-card" id="accountManagementCard" style="display:none;">
+                    <h3><i class="fas fa-user-plus"></i> 账号分发</h3>
+                    <p style="font-size:14px;color:#666;margin-bottom:12px;">添加新账号，用户将可使用此账号登录（普通用户权限）</p>
+                    <form id="addAccountForm">
+                        <div class="form-group">
+                            <label>用户名</label>
+                            <input type="text" id="newUsername" placeholder="设置用户名" required>
+                        </div>
+                        <div class="form-group">
+                            <label>密码</label>
+                            <input type="password" id="newPassword" placeholder="设置密码（至少6位）" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label>确认密码</label>
+                            <input type="password" id="newPasswordConfirm" placeholder="再次输入密码" required>
+                        </div>
+                        <button type="submit" class="btn-admin"><i class="fas fa-user-plus"></i> 添加账号</button>
+                        <div class="error-msg" id="addAccountError"></div>
+                        <div class="success-msg" id="addAccountSuccess"></div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -719,7 +709,7 @@
         }
 
         // ================================================================
-        //  用户管理（不变）
+        //  用户管理（只保留必要函数，删除列表等）
         // ================================================================
         var TABLE_USERS = 'users';
         var currentUser = null;
@@ -752,6 +742,7 @@
             } catch (e) { console.error('初始化用户表失败:', e); }
         }
 
+        // 获取所有用户（仅用于后台账号管理检查，不展示列表）
         async function getUsers() {
             try {
                 var result = await supabaseClient
@@ -870,7 +861,7 @@
         }
 
         // ================================================================
-        //  登录/注册（不变）
+        //  登录（移除注册）
         // ================================================================
         async function loginUser(username, password) {
             try {
@@ -882,34 +873,6 @@
                         showToast('⚠️ 您已被禁言（' + msg + '），可以浏览但无法评论');
                     }
                     setCurrentUser(username);
-                    return true;
-                }
-                return false;
-            } catch (e) { return false; }
-        }
-
-        async function registerUser(username, password) {
-            try {
-                var existing = await findUser(username);
-                if (existing) return false;
-                var newUser = {
-                    username: username,
-                    password: password,
-                    role: 'user',
-                    messages: [],
-                    muted: false,
-                    muted_until: 0,
-                    mute_reason: '',
-                    mute_by: '',
-                    mute_time: ''
-                };
-                var success = await saveUser(newUser);
-                if (success) {
-                    setCurrentUser(username);
-                    if (document.getElementById('page-admin').classList.contains('active')) {
-                        renderAdminUserList();
-                        updateUserCount();
-                    }
                     return true;
                 }
                 return false;
@@ -934,10 +897,15 @@
                     if (document.getElementById('page-admin').classList.contains('active')) {
                         if (!await isAdmin()) { switchPage('home');
                             showToast('普通用户无法访问管理后台'); } else {
-                            renderAdminUserList();
-                            updateUserCount();
                             renderPolicyAdminList();
                             renderLeadershipAdminList();
+                            // 显示账号管理卡片（仅超级管理员）
+                            var accountCard = document.getElementById('accountManagementCard');
+                            if (await isSuperAdmin()) {
+                                accountCard.style.display = 'block';
+                            } else {
+                                accountCard.style.display = 'none';
+                            }
                         }
                     }
                     if (document.getElementById('page-policy').classList.contains('active')) renderPolicyList();
@@ -958,60 +926,6 @@
                 document.getElementById('loginError').textContent = '❌ 登录失败，请稍后重试';
                 document.getElementById('loginError').style.display = 'block';
                 showToast('❌ 登录失败');
-                return false;
-            }
-        };
-
-        window.handleRegister = async function(e) {
-            e.preventDefault();
-            var user = document.getElementById('regUser').value.trim();
-            var pass = document.getElementById('regPass').value.trim();
-            var confirm = document.getElementById('regPassConfirm').value.trim();
-            if (pass !== confirm) {
-                document.getElementById('registerError').textContent = '两次密码不一致';
-                document.getElementById('registerError').style.display = 'block';
-                return false;
-            }
-            if (pass.length < 6) {
-                document.getElementById('registerError').textContent = '密码至少6位';
-                document.getElementById('registerError').style.display = 'block';
-                return false;
-            }
-            if (!user) {
-                document.getElementById('registerError').textContent = '请输入用户名';
-                document.getElementById('registerError').style.display = 'block';
-                return false;
-            }
-            try {
-                var success = await registerUser(user, pass);
-                if (success) {
-                    closeLoginModal();
-                    showToast('✅ 注册成功，已自动登录！');
-                    updateUIForUser();
-                    if (document.getElementById('page-admin').classList.contains('active')) {
-                        renderAdminUserList();
-                        updateUserCount();
-                        renderPolicyAdminList();
-                        renderLeadershipAdminList();
-                    }
-                    if (document.getElementById('page-policy').classList.contains('active')) renderPolicyList();
-                    if (document.getElementById('page-leadership').classList.contains('active')) renderLeadership();
-                    if (document.getElementById('page-profile').classList.contains('active')) renderProfile();
-                    if (document.getElementById('page-detail').classList.contains('active') && currentPostId) {
-                        renderComments(currentPostId);
-                    }
-                    return true;
-                } else {
-                    document.getElementById('registerError').textContent = '注册失败，用户名可能已被占用';
-                    document.getElementById('registerError').style.display = 'block';
-                    showToast('❌ 注册失败');
-                    return false;
-                }
-            } catch (err) {
-                console.error(err);
-                document.getElementById('registerError').textContent = '❌ 注册失败，请稍后重试';
-                document.getElementById('registerError').style.display = 'block';
-                showToast('❌ 注册失败');
                 return false;
             }
         };
@@ -1072,7 +986,7 @@
         }
 
         // ================================================================
-        //  删除申请（保留但后台不显示卡片，功能仍存）
+        //  删除申请（保留但后台不显示卡片）
         // ================================================================
         async function getSuperAdmins() {
             var users = await getUsers();
@@ -1186,7 +1100,7 @@
         }
 
         // ================================================================
-        //  禁言功能（保留不变）
+        //  禁言功能（保留）
         // ================================================================
         var muteTargetUser = null;
 
@@ -1285,8 +1199,7 @@
                     reason, 'mute');
                 showToast('✅ 已禁言用户 ' + targetUsername);
                 closeMuteModal();
-                await renderAdminUserList();
-                await updateUserCount();
+                // 不再刷新用户列表，但刷新可能影响其他？无影响
             } catch (error) { console.error(error);
                 showToast('禁言失败'); } finally {
                 submitBtn.disabled = false;
@@ -1315,8 +1228,6 @@
                 if (!success) { showToast('解除失败'); return; }
                 await addMessageToUser(username, '您已被管理员 ' + currentUser + ' 解除禁言。', 'unmute');
                 showToast('✅ 已解除用户 ' + username + ' 的禁言');
-                await renderAdminUserList();
-                await updateUserCount();
             });
         }
 
@@ -1445,8 +1356,6 @@
                 showToast('✅ 已批准禁言用户 ' + targetUsername);
                 closeMuteReviewModal();
                 await renderMuteReviews();
-                await renderAdminUserList();
-                await updateUserCount();
             } catch (error) { console.error(error);
                 showToast('操作失败'); }
         }
@@ -1476,8 +1385,6 @@
                 showToast('已拒绝该禁言申请');
                 closeMuteReviewModal();
                 await renderMuteReviews();
-                await renderAdminUserList();
-                await updateUserCount();
             } catch (error) { console.error(error);
                 showToast('操作失败'); }
         }
@@ -1622,8 +1529,6 @@
                 showToast('✅ 已批准解除用户 ' + targetUsername + ' 的禁言');
                 closeUnmuteReviewModal();
                 await renderUnmuteReviews();
-                await renderAdminUserList();
-                await updateUserCount();
             } catch (error) { console.error(error);
                 showToast('操作失败'); }
         }
@@ -1650,8 +1555,6 @@
                 showToast('已拒绝该解除禁言申请');
                 closeUnmuteReviewModal();
                 await renderUnmuteReviews();
-                await renderAdminUserList();
-                await updateUserCount();
             } catch (error) { console.error(error);
                 showToast('操作失败'); }
         }
@@ -1733,17 +1636,6 @@
                 if (result.error) {
                     showToast('❌ 投稿失败：' + result.error.message);
                     throw result.error;
-                }
-                if (status === 'pending' && author !== '管理员') {
-                    var adminsResult = await supabaseClient
-                        .from(TABLE_USERS)
-                        .select('*')
-                        .eq('role', 'superadmin')
-                        .limit(1);
-                    if (!adminsResult.error && adminsResult.data && adminsResult.data.length > 0) {
-                        addMessageToUser(adminsResult.data[0].username, '新投稿《' + title + '》来自 ' + author + '，请审核。',
-                            'new_post');
-                    }
                 }
                 return result.data ? result.data[0] : newPost;
             } catch (e) { throw e; }
@@ -1833,8 +1725,6 @@
                 if (result.isLiked) { likeBtn.classList.add('liked');
                     showToast('❤️ 点赞成功！'); } else { likeBtn.classList.remove('liked');
                     showToast('已取消点赞'); }
-                await renderPostList('homePostList', true);
-                await renderPostList('infoPostList', true);
             } catch (error) { showToast('操作异常'); } finally { likeBtn.disabled = false; }
         }
 
@@ -2016,19 +1906,6 @@
 
         function goBackFromDetail() { switchPage('home'); }
 
-        // 首页和信息公开不再调用此函数，但保留用于其他地方（如详情返回后刷新）
-        async function renderPostList(containerId, onlyApproved) {
-            // 如果是首页或信息公开，直接清空，不显示任何文章
-            if (containerId === 'homePostList' || containerId === 'infoPostList') {
-                var container = document.getElementById(containerId);
-                if (container) {
-                    container.innerHTML = '<div style="text-align:center;padding:40px;color:#aaa;">暂无内容</div>';
-                }
-                return;
-            }
-            // 其他情况（如政策列表不会调用此函数，而是用renderPolicyList）
-        }
-
         // ================================================================
         //  政策解读列表
         // ================================================================
@@ -2164,7 +2041,7 @@
                         }
                     });
                     window.isSuperAdmin().then(function(isSuper) {
-                        // 保留禁言审核卡片仅超级管理员可见
+                        // 禁言审核卡片仅超级管理员可见
                         var muteCard = document.getElementById('muteReviewCard');
                         if (muteCard) muteCard.style.display = isSuper ? 'block' : 'none';
                         var unmuteCard = document.getElementById('unmuteReviewCard');
@@ -2173,6 +2050,9 @@
                             renderMuteReviews();
                             renderUnmuteReviews();
                         }
+                        // 账号管理卡片仅超级管理员可见
+                        var accountCard = document.getElementById('accountManagementCard');
+                        if (accountCard) accountCard.style.display = isSuper ? 'block' : 'none';
                     });
                 } else {
                     display.textContent = '未登录';
@@ -2185,9 +2065,10 @@
                     if (muteCard) muteCard.style.display = 'none';
                     var unmuteCard = document.getElementById('unmuteReviewCard');
                     if (unmuteCard) unmuteCard.style.display = 'none';
+                    var accountCard = document.getElementById('accountManagementCard');
+                    if (accountCard) accountCard.style.display = 'none';
                 }
                 updateCommentForm();
-                // 只渲染政策、领导班子、后台等
                 if (document.getElementById('page-policy').classList.contains('active')) renderPolicyList();
                 if (document.getElementById('page-leadership').classList.contains('active')) renderLeadership();
                 if (document.getElementById('page-detail').classList.contains('active') && currentPostId) {
@@ -2196,8 +2077,6 @@
                 }
                 if (document.getElementById('page-admin') && document.getElementById('page-admin').classList.contains(
                         'active')) {
-                    renderAdminUserList();
-                    updateUserCount();
                     renderPolicyAdminList();
                     renderLeadershipAdminList();
                     renderMuteReviews();
@@ -2233,64 +2112,27 @@
         }
 
         // ================================================================
-        //  登录/注册模态框（不变）
+        //  登录/注册模态框（已移除注册，只保留登录）
         // ================================================================
         var loginModal = document.getElementById('loginModal');
         var loginError = document.getElementById('loginError');
-        var registerError = document.getElementById('registerError');
-        var tabLogin = document.getElementById('tabLogin');
-        var tabRegister = document.getElementById('tabRegister');
-        var loginContainer = document.getElementById('loginFormContainer');
-        var registerContainer = document.getElementById('registerFormContainer');
-        var modalTitle = document.getElementById('modalTitle');
-        var modalSub = document.getElementById('modalSub');
-
-        function switchAuthTab(tab) {
-            if (tab === 'login') {
-                tabLogin.classList.add('active-tab');
-                tabRegister.classList.remove('active-tab');
-                loginContainer.classList.remove('hidden');
-                registerContainer.classList.add('hidden');
-                modalTitle.textContent = '登录';
-                modalSub.textContent = '登录您的账号以发表评论';
-                loginError.style.display = 'none';
-                registerError.style.display = 'none';
-            } else {
-                tabRegister.classList.add('active-tab');
-                tabLogin.classList.remove('active-tab');
-                registerContainer.classList.remove('hidden');
-                loginContainer.classList.add('hidden');
-                modalTitle.textContent = '注册';
-                modalSub.textContent = '创建新账号，享受完整服务';
-                loginError.style.display = 'none';
-                registerError.style.display = 'none';
-            }
-        }
 
         function closeLoginModal() {
             loginModal.style.display = 'none';
             loginModal.classList.remove('show');
             loginError.style.display = 'none';
-            registerError.style.display = 'none';
             document.getElementById('loginUser').value = '';
             document.getElementById('loginPass').value = '';
-            document.getElementById('regUser').value = '';
-            document.getElementById('regPass').value = '';
-            document.getElementById('regPassConfirm').value = '';
         }
 
         function openLoginModal() {
-            switchAuthTab('login');
             loginModal.style.display = 'flex';
             loginModal.classList.add('show');
             loginError.style.display = 'none';
-            registerError.style.display = 'none';
         }
 
         document.getElementById('closeLoginModal').addEventListener('click', closeLoginModal);
         loginModal.addEventListener('click', function(e) { if (e.target === this) closeLoginModal(); });
-        tabLogin.addEventListener('click', function() { switchAuthTab('login'); });
-        tabRegister.addEventListener('click', function() { switchAuthTab('register'); });
 
         // ================================================================
         //  消息中心（不变）
@@ -2367,7 +2209,7 @@
                 isLoggedIn().then(function(loggedIn) {
                     if (!loggedIn) { openLoginModal(); return; }
                     window.isAdmin().then(function(admin) {
-                        if (!admin) { showToast('只有管理员可以访问后台'); return; }
+                        if (!admin) { showToast('普通用户无法访问后台'); return; }
                         doSwitchPage(pageId, extraData);
                     });
                 });
@@ -2395,14 +2237,17 @@
             if (pageId === 'leadership') renderLeadership();
             if (pageId === 'profile') renderProfile();
             if (pageId === 'admin') {
-                renderAdminUserList();
-                updateUserCount();
                 renderPolicyAdminList();
                 renderLeadershipAdminList();
                 renderMuteReviews();
                 renderUnmuteReviews();
                 loadNotice().then(function(notice) {
                     document.getElementById('noticeInput').value = notice || '';
+                });
+                // 显示账号管理卡片（仅超级管理员）
+                isSuperAdmin().then(function(isSuper) {
+                    var card = document.getElementById('accountManagementCard');
+                    if (card) card.style.display = isSuper ? 'block' : 'none';
                 });
             }
             if (pageId === 'detail' && extraData) {
@@ -2795,264 +2640,66 @@
         }
 
         // ================================================================
-        //  用户管理（保留）
+        //  账号管理（仅超级管理员）
         // ================================================================
-        var userSearchKeyword = '';
-
-        function filterUserList() {
-            var input = document.getElementById('userSearchInput');
-            userSearchKeyword = input.value.trim().toLowerCase();
-            renderAdminUserList();
-            updateUserCount();
-        }
-
-        function clearUserSearch() {
-            document.getElementById('userSearchInput').value = '';
-            userSearchKeyword = '';
-            renderAdminUserList();
-            updateUserCount();
-        }
-
-        async function updateUserCount() {
-            var users = await getUsers();
-            var filtered = users;
-            if (userSearchKeyword) {
-                filtered = [];
-                for (var i = 0; i < users.length; i++) {
-                    if (users[i].username.toLowerCase().includes(userSearchKeyword)) filtered.push(users[i]);
-                }
-            }
-            document.getElementById('totalUserCount').textContent = filtered.length;
-        }
-
-        function showUserManageMsg(msg, type) {
-            type = type || 'info';
-            var el = document.getElementById('userManageMsg');
-            if (!el) return;
-            el.textContent = msg;
-            el.className = 'user-manage-msg ' + type;
-            clearTimeout(el._timer);
-            el._timer = setTimeout(function() { el.className = 'user-manage-msg';
-                el.textContent = ''; }, 5000);
-        }
-
-        async function renderAdminUserList() {
-            var container = document.getElementById('adminUserList');
-            if (!container) return;
-            if (!await window.isAdmin()) { container.innerHTML = '<div class="admin-empty">权限不足</div>'; return; }
-
-            var allUsers = await getUsers();
-            var searchInput = document.getElementById('userSearchInput');
-            var keyword = searchInput ? searchInput.value.trim().toLowerCase() : '';
-            var users = allUsers;
-            if (keyword) {
-                users = users.filter(function(u) { return u.username.toLowerCase().includes(keyword); });
-            }
-
-            if (users.length === 0) {
-                container.innerHTML = '<div class="admin-empty">没有找到匹配的用户</div>';
-                return;
-            }
-
-            var currentUsername = getCurrentUser();
-            var isSuper = await window.isSuperAdmin();
-            var isAdminUser = await window.isAdmin();
-
-            var html = '';
-            for (var i = 0; i < users.length; i++) {
-                var u = users[i];
-                var role = u.role || 'user';
-                var isSelf = u.username === currentUsername;
-                var isSuperAdmin = role === 'superadmin';
-                var isTargetAdmin = role === 'admin';
-                var muted = isUserMuted(u);
-                var muteDays = getMuteRemainingDays(u);
-
-                var roleLabel = '用户',
-                    roleClass = 'user';
-                if (isSuperAdmin) { roleLabel = '超级管理员';
-                    roleClass = 'superadmin'; } else if (isTargetAdmin) { roleLabel = '管理员';
-                    roleClass = 'admin'; }
-
-                var muteLabel = '';
-                if (muted) {
-                    muteLabel = muteDays === -1 ? '🔇 永久禁言' : '🔇 禁言(' + muteDays + '天)';
-                }
-
-                var actionsHtml = '';
-
-                if (isSuper && !isSelf && !isSuperAdmin) {
-                    var targetRole = isTargetAdmin ? 'user' : 'admin';
-                    var label = isTargetAdmin ? '降级为普通用户' : '提升为管理员';
-                    var icon = isTargetAdmin ? 'fa-user-minus' : 'fa-user-plus';
-                    actionsHtml += `
-                        <button class="role-btn" onclick="changeUserRole('${u.username}', '${targetRole}')" title="${label}">
-                            <i class="fas ${icon}"></i>
-                        </button>
-                    `;
-                }
-
-                if (isAdminUser && !isSelf && !isSuperAdmin) {
-                    if (muted) {
-                        actionsHtml += `
-                            <button class="unmute-btn" onclick="unmuteUser('${u.username}')" title="解除禁言">
-                                <i class="fas fa-microphone"></i>
-                            </button>
-                        `;
-                    } else {
-                        actionsHtml += `
-                            <button class="mute-btn" onclick="openMuteModal('${u.username}')" title="禁言">
-                                <i class="fas fa-microphone-slash"></i>
-                            </button>
-                        `;
-                    }
-                }
-
-                if (isSuper && !isSelf && !isSuperAdmin) {
-                    actionsHtml += `
-                        <button class="del-btn" onclick="deleteUserDirectly('${u.username}')" title="删除用户">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    `;
-                } else if (isAdminUser && !isSelf && !isSuperAdmin && !isTargetAdmin) {
-                    actionsHtml += `
-                        <button class="del-btn" onclick="openDeleteRequestModal('${u.username}')" title="申请删除" style="color:#b8860b;">
-                            <i class="fas fa-clock"></i>
-                        </button>
-                    `;
-                }
-
-                html += `
-                    <div class="admin-list-item">
-                        <span class="item-info">
-                            <strong>${escapeHtml(u.username)}</strong>
-                            <span class="role-tag ${roleClass}">${roleLabel}</span>
-                            ${isSelf ? ' <span style="color:#888;font-size:12px;">(当前)</span>' : ''}
-                            ${muteLabel ? '<span class="muted-tag">' + muteLabel + '</span>' : ''}
-                        </span>
-                        <div class="actions">
-                            ${actionsHtml}
-                        </div>
-                    </div>
-                `;
-            }
-            container.innerHTML = html;
-        }
-
-        async function changeUserRole(username, newRole) {
-            if (!await window.isSuperAdmin()) { showToast('只有超级管理员可以修改角色'); return; }
-            try {
-                var user = await findUser(username);
-                if (!user) { showToast('用户不存在'); return; }
-                if (user.role === 'superadmin') { showToast('不能修改超级管理员'); return; }
-                user.role = newRole;
-                var success = await saveUser(user);
-                if (!success) { showToast('更新失败'); return; }
-                await renderAdminUserList();
-                await updateUserCount();
-                var roleLabel = newRole === 'admin' ? '管理员' : '普通用户';
-                showToast('✅ 用户 ' + username + ' 已' + (newRole === 'admin' ? '提升为' : '降级为') + roleLabel);
-                await addMessageToUser(username, '您的角色已变更为 ' + roleLabel + '。', 'role_change');
-                if (username === getCurrentUser()) updateUIForUser();
-            } catch (error) { console.error(error);
-                showToast('操作失败'); }
-        }
-
-        async function deleteUserDirectly(username) {
-            if (!await window.isSuperAdmin()) { showToast('只有超级管理员可以执行此操作'); return; }
-            if (username === getCurrentUser()) { showToast('不能删除自己'); return; }
-            try {
-                var user = await findUser(username);
-                if (!user) { showToast('用户不存在'); return; }
-                if (user.role === 'superadmin') { showToast('不能删除超级管理员'); return; }
-                if (!confirm('确定要永久删除用户 "' + username + '" 吗？此操作不可恢复！')) return;
-                var success = await deleteUser(username);
-                if (!success) { showToast('删除失败'); return; }
-                await renderAdminUserList();
-                await updateUserCount();
-                showToast('用户 ' + username + ' 已删除');
-                updateUIForUser();
-            } catch (error) { console.error(error);
-                showToast('删除失败'); }
-        }
-
-        // ================================================================
-        //  删除申请模态框（保留）
-        // ================================================================
-        var deleteRequestTarget = null;
-
-        function openDeleteRequestModal(username) {
-            if (!currentUser) { showToast('请先登录'); return; }
-            window.isAdmin().then(function(admin) {
-                if (!admin) { showToast('只有管理员可以申请删除'); return; }
-                window.isSuperAdmin().then(function(superAdmin) {
-                    if (superAdmin) { showToast('超级管理员请直接使用删除按钮'); return; }
-                    findUser(username).then(function(u) {
-                        if (u && u.role === 'admin') { showToast('不能申请删除管理员'); return; }
-                        deleteRequestTarget = username;
-                        document.getElementById('deleteTargetUser').textContent = username;
-                        document.getElementById('deleteReason').value = '';
-                        document.getElementById('deleteRequestError').style.display = 'none';
-                        document.getElementById('deleteRequestModal').classList.add('show');
-                    });
-                });
-            });
-        }
-
-        function closeDeleteRequestModal() {
-            document.getElementById('deleteRequestModal').classList.remove('show');
-            deleteRequestTarget = null;
-        }
-
-        document.getElementById('deleteRequestForm').addEventListener('submit', async function(e) {
+        document.getElementById('addAccountForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            var reason = document.getElementById('deleteReason').value.trim();
-            if (!reason) {
-                document.getElementById('deleteRequestError').textContent = '请填写删除理由';
-                document.getElementById('deleteRequestError').style.display = 'block';
+            if (!await window.isSuperAdmin()) { showToast('权限不足'); return; }
+            var username = document.getElementById('newUsername').value.trim();
+            var password = document.getElementById('newPassword').value.trim();
+            var confirm = document.getElementById('newPasswordConfirm').value.trim();
+            var errorEl = document.getElementById('addAccountError');
+            var successEl = document.getElementById('addAccountSuccess');
+            errorEl.style.display = 'none';
+            successEl.style.display = 'none';
+
+            if (!username || !password) {
+                errorEl.textContent = '请填写完整信息';
+                errorEl.style.display = 'block';
                 return;
             }
-            if (!deleteRequestTarget) { showToast('目标用户不存在'); return; }
-            var success = await requestDeleteUser(deleteRequestTarget, reason);
-            if (success) {
-                closeDeleteRequestModal();
-                renderAdminUserList();
-                updateUserCount();
-            } else {
-                document.getElementById('deleteRequestError').textContent = '申请提交失败';
-                document.getElementById('deleteRequestError').style.display = 'block';
+            if (password.length < 6) {
+                errorEl.textContent = '密码至少6位';
+                errorEl.style.display = 'block';
+                return;
             }
-        });
+            if (password !== confirm) {
+                errorEl.textContent = '两次密码不一致';
+                errorEl.style.display = 'block';
+                return;
+            }
 
-        document.querySelectorAll('#deleteRequestModal .close-modal').forEach(function(el) {
-            el.addEventListener('click', closeDeleteRequestModal);
-        });
-        document.getElementById('deleteRequestModal').addEventListener('click', function(e) {
-            if (e.target === this) closeDeleteRequestModal();
-        });
+            var existing = await findUser(username);
+            if (existing) {
+                errorEl.textContent = '用户名已存在';
+                errorEl.style.display = 'block';
+                return;
+            }
 
-        // 禁言模态框关闭
-        document.querySelectorAll('#muteModal .close-modal').forEach(function(el) {
-            el.addEventListener('click', closeMuteModal);
-        });
-        document.getElementById('muteModal').addEventListener('click', function(e) {
-            if (e.target === this) closeMuteModal();
-        });
+            var newUser = {
+                username: username,
+                password: password,
+                role: 'user',
+                messages: [],
+                muted: false,
+                muted_until: 0,
+                mute_reason: '',
+                mute_by: '',
+                mute_time: ''
+            };
 
-        // 禁言审核模态框关闭
-        document.querySelectorAll('#muteReviewModal .close-modal').forEach(function(el) {
-            el.addEventListener('click', closeMuteReviewModal);
-        });
-        document.getElementById('muteReviewModal').addEventListener('click', function(e) {
-            if (e.target === this) closeMuteReviewModal();
-        });
-
-        // 解除禁言审核模态框关闭
-        document.querySelectorAll('#unmuteReviewModal .close-modal').forEach(function(el) {
-            el.addEventListener('click', closeUnmuteReviewModal);
-        });
-        document.getElementById('unmuteReviewModal').addEventListener('click', function(e) {
-            if (e.target === this) closeUnmuteReviewModal();
+            var success = await saveUser(newUser);
+            if (success) {
+                successEl.textContent = '✅ 账号创建成功！用户 ' + username + ' 可登录。';
+                successEl.style.display = 'block';
+                document.getElementById('newUsername').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('newPasswordConfirm').value = '';
+                showToast('账号已添加');
+            } else {
+                errorEl.textContent = '创建失败，请重试';
+                errorEl.style.display = 'block';
+            }
         });
 
         // ================================================================
@@ -3210,19 +2857,11 @@
         window.switchPage = switchPage;
         window.showToast = showToast;
         window.openLoginModal = openLoginModal;
-        window.switchAuthTab = switchAuthTab;
         window.openMsgModal = openMsgModal;
         window.closeMsgModal = closeMsgModal;
         window.deleteMessage = deleteMessage;
         window.renderProfile = renderProfile;
         window.deleteAccount = deleteAccount;
-        window.filterUserList = filterUserList;
-        window.clearUserSearch = clearUserSearch;
-        window.updateUserCount = updateUserCount;
-        window.renderAdminUserList = renderAdminUserList;
-        window.showUserManageMsg = showUserManageMsg;
-        window.changeUserRole = changeUserRole;
-        window.deleteUserDirectly = deleteUserDirectly;
         window.toggleLike = toggleLike;
         window.toggleCommentLikeAction = toggleCommentLikeAction;
         window.closeLoginModal = closeLoginModal;
@@ -3271,10 +2910,8 @@
         window.setCurrentUser = setCurrentUser;
         window.clearCurrentUser = clearCurrentUser;
         window.loginUser = loginUser;
-        window.registerUser = registerUser;
         window.escapeHtml = escapeHtml;
         window.handleLogin = window.handleLogin;
-        window.handleRegister = window.handleRegister;
     </script>
 </body>
 </html>
