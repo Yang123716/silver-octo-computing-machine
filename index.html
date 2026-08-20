@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
     <style>
-        /* ===== 样式保持不变，此处省略，实际沿用之前样式 ===== */
+        /* ===== 样式保持不变，省略 ===== */
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif; background:#f5f5f5; color:#1e1e1e; line-height:1.7; min-height:100vh; display:flex; flex-direction:column; }
         a { text-decoration:none; color:inherit; }
@@ -632,7 +632,7 @@
         }
 
         // ================================================================
-        //  通知管理
+        //  通知管理（不变）
         // ================================================================
         var TABLE_CONFIG = 'site_config';
 
@@ -744,13 +744,14 @@
         }
 
         // ================================================================
-        //  用户管理（独立于人民共产网）
+        //  用户管理（独立于人民共产网，初始化时清空所有非超级管理员用户）
         // ================================================================
         var TABLE_USERS = 'users';
         var currentUser = null;
 
         async function initUsersTable() {
             try {
+                // 1. 确保超级管理员存在
                 var result = await supabaseClient
                     .from(TABLE_USERS)
                     .select('*')
@@ -773,7 +774,20 @@
                         }]);
                     if (insertResult.error) console.error('创建超级管理员失败:', insertResult.error);
                     else console.log('超级管理员已创建');
-                } else console.log('超级管理员已存在');
+                }
+
+                // 2. 获取所有用户，删除除超级管理员以外的所有用户（只保留总编辑）
+                var allUsers = await getUsers();
+                var superAdmin = allUsers.find(u => u.role === 'superadmin');
+                if (superAdmin) {
+                    for (var i = 0; i < allUsers.length; i++) {
+                        if (allUsers[i].username !== superAdmin.username) {
+                            await deleteUser(allUsers[i].username);
+                            console.log('已删除用户:', allUsers[i].username);
+                        }
+                    }
+                }
+                console.log('用户初始化完成，仅保留超级管理员');
             } catch (e) { console.error('初始化用户表失败:', e); }
         }
 
@@ -935,14 +949,12 @@
                             renderLeadershipAdminList();
                             renderAdminUserList();
                             updateUserCount();
-                            // 账号管理卡片仅超级管理员
                             var accountCard = document.getElementById('accountManagementCard');
                             if (await isSuperAdmin()) {
                                 accountCard.style.display = 'block';
                             } else {
                                 accountCard.style.display = 'none';
                             }
-                            // 禁言审核卡片仅超级管理员
                             var muteCard = document.getElementById('muteReviewCard');
                             if (muteCard) muteCard.style.display = await isSuperAdmin() ? 'block' : 'none';
                             var unmuteCard = document.getElementById('unmuteReviewCard');
@@ -1165,7 +1177,6 @@
                 var isTargetSuper = targetUser.role === 'superadmin';
                 if (isTargetSuper) { showToast('不能禁言超级管理员'); return; }
                 if (isTargetAdmin && !isSuper) {
-                    // 普通管理员禁言管理员需要申请
                     var pending = await getPendingMuteRequests();
                     var existing = null;
                     for (var i = 0; i < pending.length; i++) {
@@ -1745,11 +1756,10 @@
         }
 
         // ================================================================
-        //  文章阅读（仅用于政策详情，使用独立存储，不再依赖posts表）
+        //  文章阅读（仅用于政策详情，使用独立存储）
         // ================================================================
         var currentPostId = null;
 
-        // 获取单条政策（用于详情）
         async function getPolicyById(id) {
             var policies = await getPolicies();
             for (var i = 0; i < policies.length; i++) {
@@ -1763,20 +1773,17 @@
             if (!policy) { showToast('文章不存在'); return; }
             currentPostId = policyId;
             switchPage('detail', policyId);
-            // 模拟浏览量增加（不持久化）
             var viewCount = document.getElementById('viewCount');
             if (viewCount) {
                 var views = parseInt(viewCount.textContent) || 0;
                 viewCount.textContent = views + 1;
             }
-            // 点赞状态（不持久化）
             var likeBtn = document.getElementById('likeBtn');
             if (likeBtn) {
                 likeBtn.classList.remove('liked');
                 document.getElementById('likeCount').textContent = '0';
                 likeBtn.disabled = false;
             }
-            // 渲染详情
             await renderDetail(policyId);
         }
 
@@ -1797,7 +1804,7 @@
         function goBackFromDetail() { switchPage('policy'); }
 
         // ================================================================
-        //  评论功能（独立于文章存储，评论数据仍用 comments 表，关联 post_id）
+        //  评论功能
         // ================================================================
         var TABLE_COMMENTS = 'comments';
 
@@ -1904,7 +1911,10 @@
             } catch (e) { return false; }
         }
 
-        // 点赞（文章点赞功能移除，仅保留评论点赞）
+        // 点赞（文章点赞移除）
+        async function toggleLike() {
+            showToast('此功能已移除');
+        }
 
         // ================================================================
         //  政策解读列表渲染
@@ -1917,7 +1927,6 @@
                 container.innerHTML = '<div style="color:#999;padding:20px;">暂无政策解读内容，敬请期待。</div>';
                 return;
             }
-            // 按日期降序
             policies.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
             var html = '';
             for (var i = 0; i < policies.length; i++) {
@@ -2002,7 +2011,6 @@
                         }
                     });
                     window.isSuperAdmin().then(function(isSuper) {
-                        // 禁言审核卡片
                         var muteCard = document.getElementById('muteReviewCard');
                         if (muteCard) muteCard.style.display = isSuper ? 'block' : 'none';
                         var unmuteCard = document.getElementById('unmuteReviewCard');
@@ -2011,7 +2019,6 @@
                             renderMuteReviews();
                             renderUnmuteReviews();
                         }
-                        // 账号管理卡片
                         var accountCard = document.getElementById('accountManagementCard');
                         if (accountCard) accountCard.style.display = isSuper ? 'block' : 'none';
                     });
@@ -2075,7 +2082,7 @@
         }
 
         // ================================================================
-        //  登录模态框（关闭）
+        //  登录模态框
         // ================================================================
         var loginModal = document.getElementById('loginModal');
         var loginError = document.getElementById('loginError');
@@ -2209,7 +2216,6 @@
                 loadNotice().then(function(notice) {
                     document.getElementById('noticeInput').value = notice || '';
                 });
-                // 账号管理卡片
                 isSuperAdmin().then(function(isSuper) {
                     var card = document.getElementById('accountManagementCard');
                     if (card) card.style.display = isSuper ? 'block' : 'none';
@@ -2680,7 +2686,7 @@
         });
 
         // ================================================================
-        //  用户管理（列表、搜索、提升/降级管理员、禁言、删除）
+        //  用户管理（列表、搜索、提升/降级、禁言、删除）
         // ================================================================
         var userSearchKeyword = '';
 
@@ -2780,7 +2786,6 @@
 
                 // 禁言/解除禁言（管理员可操作，不能操作自己，不能操作超级管理员，不能操作比自己权限高的）
                 if (isAdminUser && !isSelf && !isSuperAdmin) {
-                    // 普通管理员不能操作管理员，除非有超级管理员权限（但超级管理员已包含）
                     if (!(isTargetAdmin && !isSuper)) {
                         if (muted) {
                             actionsHtml += `
@@ -2806,7 +2811,6 @@
                         </button>
                     `;
                 } else if (isAdminUser && !isSelf && !isSuperAdmin && !isTargetAdmin) {
-                    // 普通管理员可申请删除其他普通用户
                     actionsHtml += `
                         <button class="del-btn" onclick="openDeleteRequestModal('${u.username}')" title="申请删除" style="color:#b8860b;">
                             <i class="fas fa-clock"></i>
@@ -2953,7 +2957,7 @@
         });
 
         // ================================================================
-        //  评论相关（保持不变）
+        //  评论相关
         // ================================================================
         async function renderComments(postId) {
             var container = document.getElementById('commentList');
@@ -3046,8 +3050,6 @@
             }
         }
 
-        // 文章点赞功能移除（已无文章点赞需求）
-
         // ================================================================
         //  通知表单
         // ================================================================
@@ -3098,6 +3100,7 @@
 
             console.log('✅ 人民共产中央宣传部已启动');
             console.log('📌 超级管理员：杨振浩 / Yzh061110');
+            console.log('✅ 已清空所有非超级管理员用户，仅保留总编辑');
         });
 
         // 暴露全局函数
